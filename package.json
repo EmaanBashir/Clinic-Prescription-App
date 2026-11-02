@@ -1,0 +1,26 @@
+
+{
+  "name": "prescription-app",
+  "version": "1.0.0",
+  "description": "Offline Doctor Prescription Management",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "*",
+    "electron-builder": "*"
+  },
+  "dependencies": {
+    "better-sqlite3": "*",
+    "xlsx": "*"
+  },
+  "build": {
+    "appId": "com.prescription.doctorapp",
+    "productName": "Prescription Manager",
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self';">
+    <title>Prescription Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">+</div>
+                <div>
+                    <h2>Prescription</h2>
+                    <p>Manager</p>
+                </div>
+            </div>
+
+            <div class="menu-heading">MAIN MENU</div>
+            <nav>
+                <button class="nav-button active" data-page="dashboard">▦ Dashboard</button>
+                <button class="nav-button" data-page="new">＋ New Prescription</button>
+                <button class="nav-button" data-page="history">◷ Prescription History</button>
+                <button class="nav-button" data-page="patients">♙ Patients</button>
+            </nav>
+
+            <div class="menu-heading management-heading">MANAGEMENT</div>
+            <nav>
+                <button class="nav-button" data-page="lists">☷ Manage Lists</button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator"></div>
+                Offline application
+            </div>
+        </aside>
+
+        <div class="main-container">
+            <header class="topbar">
+                <div>
+                    <h3 id="page-title">Dashboard</h3>
+                    <p>Prescription Management System</p>
+                </div>
+                <span class="offline-label">● Offline</span>
+            </header>
+
+            <main>
+
+                <!-- DASHBOARD -->
+                <section class="page active" id="dashboard">
+                    <div class="welcome-section">
+                        <h1>Welcome</h1>
+                        <p>Manage patient prescriptions and medical records.</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">▤</div>
+                            <div>
+                                <p>Total Prescriptions</p>
+                                <h2 id="total-prescriptions">0</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">♙</div>
+                            <div>
+                                <p>Total Patients</p>
+                                <h2 id="total-patients">0</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <h2>Quick Actions</h2>
+                        <div class="action-grid">
+                            <button class="action-button" data-page="new">
+                                <span class="action-icon">＋</span>
+                                <div>
+                                    <strong>New Prescription</strong>
+                                    <small>Create a new prescription</small>
+                                </div>
+                            </button>
+                            <button class="action-button" data-page="history">
+                                <span class="action-icon">◷</span>
+                                <div>
+                                    <strong>Prescription History</strong>
+                                    <small>View previous prescriptions</small>
+                                </div>
+                            </button>
+                            <button class="action-button" data-page="patients">
+                                <span class="action-icon">♙</span>
+                                <div>
+                                    <strong>Patients</strong>
+                                    <small>Search patient records</small>
+                                </div>
+                            </button>
+                            <button class="action-button" data-page="lists">
+                                <span class="action-icon">☷</span>
+                                <div>
+                                    <strong>Manage Lists</strong>
+                                    <small>Manage dropdown options</small>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                </section>
+
+
+                <!-- NEW PRESCRIPTION -->
+                <section class="page" id="new">
+
+                    <div class="form-heading">
+                        <div>
+                            <h1>New Prescription</h1>
+                            <p>Enter the patient and clinical information below.</p>
+                        </div>
+                        <button type="button" class="secondary-button" id="reset-form">Clear Form</button>
+                    </div>
+
+                    <div class="prescription-workspace">
+
+                        <!-- ENTRY FORM -->
+                        <div class="entry-panel">
+
+                            <form id="prescription-form">
+
+                                <div class="content-card">
+                                    <h2>1. Patient Information</h2>
+
+                                    <div class="form-grid">
+                                        <div class="field">
+                                            <label for="mr-number">MR Number</label>
+                                            <input id="mr-number" type="text" placeholder="Enter MR number">
+                                        </div>
+
+                                        <div class="field">
+                                            <label for="prescription-date">Date</label>
+                                            <input id="prescription-date" type="date">
+                                        </div>
+
+                                        <div class="field full-width">
+                                            <label for="patient-name">Patient Name</label>
+                                            <input id="patient-name" type="text" placeholder="Enter full name">
+                                        </div>
+
+                                        <div class="field">
+                                            <label for="patient-age">Age</label>
+                                            <input id="patient-age" type="text" placeholder="Enter age">
+                                        </div>
+
+                                        <div class="field">
+                                            <label for="patient-gender">Gender</label>
+                                            <select id="patient-gender">
+                                                <option value="">Select gender</option>
+                                                <option>Male</option>
+                                                <option>Female</option>
+                                                <option>Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="content-card">
+                                    <h2>2. Observations</h2>
+
+                                    <div class="form-grid three-columns">
+                                        <div class="field">
+                                            <label for="bp">BP</label>
+                                            <input id="bp" type="text" placeholder="e.g. 120/80">
+                                        </div>
+
+                                        <div class="field">
+                                            <label for="pulse">Pulse</label>
+                                            <input id="pulse" type="text" placeholder="e.g. 72 bpm">
+                                        </div>
+
+                                        <div class="field">
+                                            <label for="temperature">Temp</label>
+                                            <input id="temperature" type="text" placeholder="e.g. 37°C">
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="content-card">
+                                    <h2>3. Investigations</h2>
+
+                                    <div class="field">
+
+                                        <label for="investigation-search">
+                                            Search Investigations
+                                        </label>
+
+                                        <input type="text" id="investigation-search"
+                                            placeholder="Type to search investigations...">
+
+                                        <small class="field-help">
+                                            Tick the investigations you want to include.
+                                            You can select multiple options without using Ctrl.
+                                        </small>
+
+                                        <div id="investigation-list" class="investigation-list">
+                                        </div>
+
+                                        <div class="selected-investigations">
+                                            <strong>Selected Investigations:</strong>
+
+                                            <div id="selected-investigation-list" class="selected-investigation-list">
+                                                <span class="empty-selection">
+                                                    No investigations selected.
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="content-card">
+                                    <h2>4. Treatment</h2>
+
+                                    <p class="section-description">
+                                        Add one or more medicines or treatments.
+                                        Each treatment has four fields.
+                                    </p>
+
+                                    <div id="treatment-fields">
+                                        <!-- Treatment cards will be generated using JavaScript -->
+                                    </div>
+
+                                    <button type="button" class="add-treatment-button" id="add-treatment-button">
+
+                                        + Add Another Treatment
+
+                                    </button>
+
+                                </div>
+
+
+
+                                <div class="content-card">
+                                    <h2>5. Follow-up</h2>
+
+                                    <div class="field">
+                                        <label for="followup">
+                                            Follow-up instructions
+                                        </label>
+                                        <textarea id="followup" rows="3"
+                                            placeholder="Enter follow-up instructions"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+
+                                    <button type="button" class="secondary-button" id="preview-button">
+                                        Update Preview
+                                    </button>
+
+                                    <button type="button" class="primary-button" id="print-button">
+                                        Print Prescription
+                                    </button>
+
+                                </div>
+
+                            </form>
+                        </div>
+
+
+                        <!-- LIVE A4 PREVIEW -->
+                        <div class="preview-panel">
+                            <div class="preview-heading">
+                                <h2>A4 Preview</h2>
+                                <span>Print layout</span>
+                            </div>
+
+                            <div class="paper-container">
+
+                                <div id="prescription-paper">
+
+                                    <div class="paper-top-space"></div>
+
+                                    <div class="vco-row">
+                                        <div class="vco-box">VCO</div>
+                                    </div>
+
+                                    <div class="patient-details">
+                                        <div>
+                                            <strong>MR NO:</strong>
+                                            <span id="preview-mr"></span>
+                                        </div>
+                                        <div>
+                                            <strong>NAME:</strong>
+                                            <span id="preview-name"></span>
+                                        </div>
+                                        <div>
+                                            <strong>DATE:</strong>
+                                            <span id="preview-date"></span>
+                                        </div>
+                                        <div>
+                                            <strong>AGE:</strong>
+                                            <span id="preview-age"></span>
+                                        </div>
+                                        <div>
+                                            <strong>GENDER:</strong>
+                                            <span id="preview-gender"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="paper-clinical-area">
+
+                                        <div class="paper-left">
+
+                                            <div class="paper-observations">
+                                                <div>
+                                                    <strong>BP</strong>
+                                                    <span id="preview-bp"></span>
+                                                </div>
+                                                <div>
+                                                    <strong>Pulse</strong>
+                                                    <span id="preview-pulse"></span>
+                                                </div>
+                                                <div>
+                                                    <strong>Temp</strong>
+                                                    <span id="preview-temp"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="paper-investigations">
+                                                <strong>Inv</strong>
+                                                <div id="preview-investigations"></div>
+                                            </div>
+
+                                            <div class="paper-followup">
+                                                <strong>Followup</strong>
+                                                <div id="preview-followup"></div>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="paper-right">
+
+                                            <div class="paper-treatments" id="preview-treatments">
+
+                                                <div class="paper-treatment">
+                                                    <span>1.</span>
+                                                    <div></div>
+                                                </div>
+
+                                                <div class="paper-treatment">
+                                                    <span>2.</span>
+                                                    <div></div>
+                                                </div>
+
+                                                <div class="paper-treatment">
+                                                    <span>3.</span>
+                                                    <div></div>
+                                                </div>
+
+                                                <div class="paper-treatment">
+                                                    <span>4.</span>
+                                                    <div></div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <p class="preview-note">
+                                The preview updates as you enter information.
+                                Final print positioning will be calibrated
+                                against the original template.
+                            </p>
+                        </div>
+
+                    </div>
+                </section>
+
+
+                <!-- PLACEHOLDER PAGES -->
+                <section class="page" id="history">
+
+                    <div class="content-card">
+                        <h1>Prescription History</h1>
+                        <p>View previously saved prescriptions.</p>
+
+                        <p id="history-status" role="status">
+                            Loading prescriptions...
+                        </p>
+
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Patient Name</th>
+                                        <th>MR Number</th>
+                                        <th>Age</th>
+                                        <th>Gender</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="content-card" id="history-detail" hidden>
+                        <h2>Prescription Details</h2>
+                        <div id="history-detail-content"></div>
+                    </div>
+
+                </section>
+
+                <section class="page" id="patients">
+
+                    <div class="content-card">
+
+                        <h1>Patients</h1>
+                        <p>View and search registered patients.</p>
+
+                        <div class="field">
+                            <label for="patient-search">Search Patients</label>
+                            <input type="text" id="patient-search" placeholder="Search by patient name or MR number...">
+                        </div>
+
+                        <p id="patients-status" role="status">
+                            Loading patients...
+                        </p>
+
+                        <div class="history-table-container">
+
+                            <table class="history-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Patient Name</th>
+                                        <th>MR Number</th>
+                                        <th>Age</th>
+                                        <th>Gender</th>
+                                        <th>Prescriptions</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="patients-table-body">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <section class="page" id="lists">
+                    <div class="content-card">
+                        <h1>Manage Lists</h1>
+
+                        <p>
+                            Manage the options used in the prescription form
+                            through the Excel workbook.
+                        </p>
+
+                        <div class="form-actions">
+                            <button type="button" class="primary-button" id="open-options-workbook">
+                                Open Excel Workbook
+                            </button>
+
+                            <button type="button" class="secondary-button" id="reload-options">
+                                Reload Options
+                            </button>
+                        </div>
+
+                        <p id="options-status" role="status">
+                            Options have not been loaded yet.
+                        </p>
+
+                        <p class="field-help">
+                            To update the lists, open the workbook, make your changes,
+                            save it, close Excel, and then select Reload Options.
+                        </p>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+
+</html>
