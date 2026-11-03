@@ -1,4 +1,3 @@
-
 {
   "name": "prescription-app",
   "version": "1.0.0",
@@ -22,5 +21,9 @@
     "win": {
       "target": "nsis"
     }
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true,
+    "electron-winstaller@5.4.0": true
   }
 }

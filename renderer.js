@@ -1056,222 +1056,222 @@ document.addEventListener('DOMContentLoaded', () => {
     let treatmentCounter = 0;
 
 
-function createTreatmentSelect(
-    treatmentId,
-    fieldName,
-    labelText,
-    optionValues
-) {
+    function createTreatmentSelect(
+        treatmentId,
+        fieldName,
+        labelText,
+        optionValues
+    ) {
 
-    const field = createElement('div', 'field');
+        const field = createElement('div', 'field');
 
-    const label = createElement(
-        'label',
-        '',
-        labelText
-    );
-
-    if (fieldName === 'medicine') {
-
-        const wrapper = createElement(
-            'div',
-            'medicine-autocomplete'
+        const label = createElement(
+            'label',
+            '',
+            labelText
         );
 
-        const input = createElement('input');
+        if (fieldName === 'medicine') {
 
-        input.type = 'text';
-        input.id = `treatment-${treatmentId}-${fieldName}`;
-        input.dataset.field = fieldName;
-        input.placeholder = 'Type to search medicine...';
-        input.autocomplete = 'off';
-
-        const suggestions = createElement(
-            'div',
-            'medicine-suggestions'
-        );
-
-        suggestions.style.display = 'none';
-
-        input._medicineOptions = optionValues;
-
-        input._renderMedicineSuggestions = function () {
-
-            const searchText = input.value.trim().toLowerCase();
-
-            const matches = input._medicineOptions.filter(value =>
-                value.toLowerCase().includes(searchText)
+            const wrapper = createElement(
+                'div',
+                'medicine-autocomplete'
             );
 
-            suggestions.replaceChildren();
+            const input = createElement('input');
 
-            if (matches.length === 0) {
+            input.type = 'text';
+            input.id = `treatment-${treatmentId}-${fieldName}`;
+            input.dataset.field = fieldName;
+            input.placeholder = 'Type to search medicine...';
+            input.autocomplete = 'off';
 
-                const noResults = createElement(
-                    'div',
-                    'medicine-no-results',
-                    'No matching medicines found'
+            const suggestions = createElement(
+                'div',
+                'medicine-suggestions'
+            );
+
+            suggestions.style.display = 'none';
+
+            input._medicineOptions = optionValues;
+
+            input._renderMedicineSuggestions = function () {
+
+                const searchText = input.value.trim().toLowerCase();
+
+                const matches = input._medicineOptions.filter(value =>
+                    value.toLowerCase().includes(searchText)
                 );
 
-                suggestions.appendChild(noResults);
+                suggestions.replaceChildren();
 
-            } else {
+                if (matches.length === 0) {
 
-                matches.forEach(value => {
-
-                    const item = createElement(
+                    const noResults = createElement(
                         'div',
-                        'medicine-suggestion',
-                        value
+                        'medicine-no-results',
+                        'No matching medicines found'
                     );
 
-                    item.addEventListener('mousedown', event => {
+                    suggestions.appendChild(noResults);
 
-                        event.preventDefault();
+                } else {
 
-                        input.value = value;
+                    matches.forEach(value => {
 
-                        suggestions.style.display = 'none';
+                        const item = createElement(
+                            'div',
+                            'medicine-suggestion',
+                            value
+                        );
 
-                        updatePreview();
+                        item.addEventListener('mousedown', event => {
+
+                            event.preventDefault();
+
+                            input.value = value;
+
+                            suggestions.style.display = 'none';
+
+                            updatePreview();
+
+                        });
+
+                        suggestions.appendChild(item);
 
                     });
 
-                    suggestions.appendChild(item);
-
-                });
-
-            }
-
-            suggestions.style.display = 'block';
-
-        };
-
-        input.addEventListener('input', () => {
-            input._renderMedicineSuggestions();
-            updatePreview();
-        });
-
-        input.addEventListener('focus', () => {
-            input._renderMedicineSuggestions();
-        });
-
-        input.addEventListener('blur', () => {
-            suggestions.style.display = 'none';
-        });
-
-        wrapper.appendChild(input);
-        wrapper.appendChild(suggestions);
-
-        field.appendChild(label);
-        field.appendChild(wrapper);
-
-    } else {
-
-        const select = createElement('select');
-
-        select.id = `treatment-${treatmentId}-${fieldName}`;
-        select.dataset.field = fieldName;
-
-        const placeholder = createElement(
-            'option',
-            '',
-            `Select ${labelText.toLowerCase()}`
-        );
-
-        placeholder.value = '';
-        select.appendChild(placeholder);
-
-        optionValues.forEach(value => {
-
-            const option = createElement('option', '', value);
-
-            option.value = value;
-
-            select.appendChild(option);
-
-        });
-
-        select.addEventListener('change', updatePreview);
-
-        field.appendChild(label);
-        field.appendChild(select);
-
-    }
-
-    return field;
-
-}
-function refreshTreatmentSelects() {
-
-    const cards =
-        treatmentContainer.querySelectorAll('.treatment-card');
-
-    cards.forEach(card => {
-
-        const treatmentId = card.dataset.treatmentId;
-
-        const fields = [
-            { name: 'medicine', values: options.medicines },
-            { name: 'dosage', values: options.dosage },
-            { name: 'timing', values: options.timing },
-            { name: 'duration', values: options.duration }
-        ];
-
-        fields.forEach(field => {
-
-            const element = document.getElementById(
-                `treatment-${treatmentId}-${field.name}`
-            );
-
-            if (!element) return;
-
-            const previousValue = element.value;
-
-            if (field.name === 'medicine') {
-
-                element._medicineOptions = field.values;
-
-                if (element._renderMedicineSuggestions) {
-                    element._renderMedicineSuggestions();
                 }
 
-            } else {
+                suggestions.style.display = 'block';
 
-                element.replaceChildren();
+            };
 
-                const placeholder = createElement(
-                    'option',
-                    '',
-                    `Select ${field.name === 'dosage'
-                        ? 'dose / frequency'
-                        : field.name}`
+            input.addEventListener('input', () => {
+                input._renderMedicineSuggestions();
+                updatePreview();
+            });
+
+            input.addEventListener('focus', () => {
+                input._renderMedicineSuggestions();
+            });
+
+            input.addEventListener('blur', () => {
+                suggestions.style.display = 'none';
+            });
+
+            wrapper.appendChild(input);
+            wrapper.appendChild(suggestions);
+
+            field.appendChild(label);
+            field.appendChild(wrapper);
+
+        } else {
+
+            const select = createElement('select');
+
+            select.id = `treatment-${treatmentId}-${fieldName}`;
+            select.dataset.field = fieldName;
+
+            const placeholder = createElement(
+                'option',
+                '',
+                `Select ${labelText.toLowerCase()}`
+            );
+
+            placeholder.value = '';
+            select.appendChild(placeholder);
+
+            optionValues.forEach(value => {
+
+                const option = createElement('option', '', value);
+
+                option.value = value;
+
+                select.appendChild(option);
+
+            });
+
+            select.addEventListener('change', updatePreview);
+
+            field.appendChild(label);
+            field.appendChild(select);
+
+        }
+
+        return field;
+
+    }
+    function refreshTreatmentSelects() {
+
+        const cards =
+            treatmentContainer.querySelectorAll('.treatment-card');
+
+        cards.forEach(card => {
+
+            const treatmentId = card.dataset.treatmentId;
+
+            const fields = [
+                { name: 'medicine', values: options.medicines },
+                { name: 'dosage', values: options.dosage },
+                { name: 'timing', values: options.timing },
+                { name: 'duration', values: options.duration }
+            ];
+
+            fields.forEach(field => {
+
+                const element = document.getElementById(
+                    `treatment-${treatmentId}-${field.name}`
                 );
 
-                placeholder.value = '';
-                element.appendChild(placeholder);
+                if (!element) return;
 
-                field.values.forEach(value => {
+                const previousValue = element.value;
 
-                    const option = createElement('option', '', value);
+                if (field.name === 'medicine') {
 
-                    option.value = value;
+                    element._medicineOptions = field.values;
 
-                    element.appendChild(option);
+                    if (element._renderMedicineSuggestions) {
+                        element._renderMedicineSuggestions();
+                    }
 
-                });
+                } else {
 
-                element.value = field.values.includes(previousValue)
-                    ? previousValue
-                    : '';
+                    element.replaceChildren();
 
-            }
+                    const placeholder = createElement(
+                        'option',
+                        '',
+                        `Select ${field.name === 'dosage'
+                            ? 'dose / frequency'
+                            : field.name}`
+                    );
+
+                    placeholder.value = '';
+                    element.appendChild(placeholder);
+
+                    field.values.forEach(value => {
+
+                        const option = createElement('option', '', value);
+
+                        option.value = value;
+
+                        element.appendChild(option);
+
+                    });
+
+                    element.value = field.values.includes(previousValue)
+                        ? previousValue
+                        : '';
+
+                }
+
+            });
 
         });
 
-    });
-
-}
+    }
 
     function addTreatment() {
 
