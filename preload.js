@@ -1,3 +1,4 @@
+
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('appInfo', {
@@ -18,6 +19,7 @@ contextBridge.exposeInMainWorld('prescriptionOptions', {
 
 });
 
+
 // =====================================
 // PRESCRIPTION DATABASE
 // =====================================
@@ -36,7 +38,13 @@ contextBridge.exposeInMainWorld('prescriptionDatabase', {
     delete: (prescriptionId) =>
         ipcRenderer.invoke('prescription:delete', prescriptionId),
 
+    deletePatient: (patientId) =>
+        ipcRenderer.invoke('patients:delete', patientId),
+
     getDashboardStatistics: () =>
-    ipcRenderer.invoke('dashboard:statistics'),
+        ipcRenderer.invoke('dashboard:statistics'),
+
+    print: () =>
+        ipcRenderer.invoke('prescription:print')
 
 });

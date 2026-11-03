@@ -1,3 +1,4 @@
+
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -322,15 +323,16 @@ ipcMain.handle('prescription:save', (event, prescription) => {
             throw new Error('Invalid prescription information.');
         }
 
-        const mrNumber = String(prescription.mrNumber || '').trim();
+        let mrNumber = String(prescription.mrNumber || '').trim();
+
         const patientName = String(prescription.patientName || '').trim();
         const prescriptionDate = String(
             prescription.prescriptionDate || ''
         ).trim();
 
-        if (!mrNumber || !patientName || !prescriptionDate) {
+        if (!patientName || !prescriptionDate) {
             throw new Error(
-                'Patient name, MR number and prescription date are required.'
+                'Patient name and prescription date are required.'
             );
         }
 
@@ -344,12 +346,46 @@ ipcMain.handle('prescription:save', (event, prescription) => {
 
         const saveTransaction = db.transaction(() => {
 
+            // Generate a unique NA number if the doctor has not entered an MR number.
+            if (!mrNumber) {
+
+                const existingNumbers = db.prepare(`
+        SELECT mr_number
+        FROM patients
+        WHERE mr_number GLOB 'NA[0-9]*'
+    `).all();
+
+                let highestNumber = 0;
+
+                existingNumbers.forEach(record => {
+
+                    const match = record.mr_number.match(/^NA(\d+)$/);
+
+                    if (match) {
+                        highestNumber = Math.max(
+                            highestNumber,
+                            Number(match[1])
+                        );
+                    }
+
+                });
+
+                do {
+                    highestNumber++;
+                    mrNumber = `NA${String(highestNumber).padStart(4, '0')}`;
+
+                } while (db.prepare(`
+        SELECT id FROM patients WHERE mr_number = ?
+    `).get(mrNumber));
+
+            }
+
             // Find an existing patient by MR number.
             let patient = db.prepare(`
-                SELECT id
-                FROM patients
-                WHERE mr_number = ?
-            `).get(mrNumber);
+    SELECT id
+    FROM patients
+    WHERE mr_number = ?
+`).get(mrNumber);
 
             let patientId;
 
@@ -463,7 +499,8 @@ ipcMain.handle('prescription:save', (event, prescription) => {
 
             return {
                 prescriptionId,
-                patientId
+                patientId,
+                mrNumber
             };
 
         });
@@ -592,6 +629,7 @@ ipcMain.handle('prescription:delete', (event, prescriptionId) => {
 
 });
 
+
 // =====================================
 // DASHBOARD STATISTICS
 // =====================================
@@ -628,6 +666,48 @@ ipcMain.handle('dashboard:statistics', () => {
     }
 
 });
+
+
+// =====================================
+// PRINT PRESCRIPTION
+// =====================================
+
+ipcMain.handle('prescription:print', (event) => {
+
+    return new Promise((resolve) => {
+
+        try {
+
+            event.sender.print({
+                silent: false,
+                printBackground: true,
+                color: true,
+                landscape: false,
+                pageSize: 'A4',
+                margins: { marginType: 'none' },
+                scaleFactor: 100
+            }, (success, failureReason) => {
+
+                resolve({
+                    success,
+                    message: failureReason || ''
+                });
+
+            });
+
+        } catch (error) {
+
+            resolve({
+                success: false,
+                message: error.message
+            });
+
+        }
+
+    });
+
+});
+
 
 // =====================================
 // LOAD PATIENTS
@@ -674,8 +754,71 @@ ipcMain.handle('patients:list', () => {
 
 });
 
+
 // =====================================
-// 7. APPLICATION STARTUP
+// DELETE PATIENT AND ASSOCIATED PRESCRIPTIONS
+// =====================================
+
+ipcMain.handle('patients:delete', (event, patientId) => {
+
+    try {
+
+        const id = Number(patientId);
+
+        if (!Number.isSafeInteger(id) || id <= 0) {
+            throw new Error('Invalid patient ID.');
+        }
+
+        // Delete the prescriptions and patient together.
+        // If either operation fails, the transaction is rolled back.
+        const deleteTransaction = db.transaction(() => {
+
+            const patient = db.prepare(`
+                SELECT id
+                FROM patients
+                WHERE id = ?
+            `).get(id);
+
+            if (!patient) {
+                throw new Error('Patient could not be found.');
+            }
+
+            db.prepare(`
+                DELETE FROM prescriptions
+                WHERE patient_id = ?
+            `).run(id);
+
+            db.prepare(`
+                DELETE FROM patients
+                WHERE id = ?
+            `).run(id);
+
+        });
+
+        deleteTransaction();
+
+        console.log('Patient and associated prescriptions deleted:', id);
+
+        return {
+            success: true
+        };
+
+    } catch (error) {
+
+        console.error('Error deleting patient:', error);
+
+        return {
+            success: false,
+            message: error.message
+        };
+
+    }
+
+});
+
+
+// =====================================
+// APPLICATION STARTUP
 // =====================================
 
 app.whenReady().then(() => {
@@ -708,8 +851,9 @@ app.whenReady().then(() => {
 
 });
 
+
 // =====================================
-// 7. APPLICATION SHUTDOWN
+// APPLICATION SHUTDOWN
 // =====================================
 
 app.on('before-quit', () => {

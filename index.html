@@ -286,10 +286,6 @@
 
                                     <div class="paper-top-space"></div>
 
-                                    <div class="vco-row">
-                                        <div class="vco-box">VCO</div>
-                                    </div>
-
                                     <div class="patient-details">
                                         <div>
                                             <strong>MR NO:</strong>
@@ -303,6 +299,7 @@
                                             <strong>DATE:</strong>
                                             <span id="preview-date"></span>
                                         </div>
+                                        <div class="vco-box">VCO</div>
                                         <div>
                                             <strong>AGE:</strong>
                                             <span id="preview-age"></span>
@@ -333,7 +330,7 @@
                                             </div>
 
                                             <div class="paper-investigations">
-                                                <strong>Inv</strong>
+                                                <strong>Investigation Advised</strong>
                                                 <div id="preview-investigations"></div>
                                             </div>
 
@@ -396,6 +393,24 @@
                         <h1>Prescription History</h1>
                         <p>View previously saved prescriptions.</p>
 
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="history-date-filter">Filter by Date</label>
+                                <input type="date" id="history-date-filter">
+                            </div>
+
+                            <div class="field">
+                                <label for="history-month-filter">Filter by Month</label>
+                                <input type="month" id="history-month-filter">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="secondary-button" id="clear-history-filters">
+                                Clear Filters
+                            </button>
+                        </div>
+
                         <p id="history-status" role="status">
                             Loading prescriptions...
                         </p>
@@ -415,6 +430,11 @@
                                 <tbody id="history-table-body">
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="secondary-button" id="history-load-more" hidden>
+                                Load More
+                            </button>
                         </div>
                     </div>
 
@@ -461,6 +481,11 @@
 
                             </table>
 
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="secondary-button" id="patients-load-more" hidden>
+                                Load More
+                            </button>
                         </div>
 
                     </div>

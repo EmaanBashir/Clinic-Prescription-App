@@ -158,13 +158,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let historyLoadRequest = 0;
     let requestedPatientHistory = null;
 
-    async function loadPrescriptionHistory(patientMRNumber = null) {
+    let historyVisibleCount = 40;
+    let currentHistoryPatientMRNumber = null;
+
+    async function loadPrescriptionHistory(
+        patientMRNumber = null,
+        preserveVisibleCount = false
+    ) {
 
         const requestId = ++historyLoadRequest;
+        currentHistoryPatientMRNumber = patientMRNumber;
+
+        if (!preserveVisibleCount) {
+            historyVisibleCount = 40;
+        }
 
         const status = document.getElementById('history-status');
         const tableBody = document.getElementById('history-table-body');
         const detailPanel = document.getElementById('history-detail');
+
+        const loadMoreButton =
+            document.getElementById('history-load-more');
+
+        loadMoreButton.hidden = true;
 
         status.textContent = 'Loading prescriptions...';
         tableBody.replaceChildren();
@@ -196,6 +212,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
 
+            // Filter records by a specific date.
+            const selectedDate =
+                document.getElementById('history-date-filter').value;
+
+            if (selectedDate) {
+                prescriptions = prescriptions.filter(
+                    prescription =>
+                        prescription.prescription_date === selectedDate
+                );
+            }
+
+            // Filter records by month.
+            const selectedMonth =
+                document.getElementById('history-month-filter').value;
+
+            if (selectedMonth) {
+                prescriptions = prescriptions.filter(
+                    prescription =>
+                        prescription.prescription_date.startsWith(selectedMonth)
+                );
+            }
+
             if (prescriptions.length === 0) {
 
                 status.textContent = patientMRNumber !== null
@@ -206,11 +244,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
 
-            status.textContent = patientMRNumber !== null
-                ? `${prescriptions.length} prescription(s) for the selected patient.`
-                : `${prescriptions.length} prescription(s) found.`;
+            const displayedCount = Math.min(
+                historyVisibleCount,
+                prescriptions.length
+            );
 
-            prescriptions.forEach(prescription => {
+            status.textContent = patientMRNumber !== null
+                ? `${displayedCount} of ${prescriptions.length} prescription(s) for the selected patient.`
+                : `${displayedCount} of ${prescriptions.length} prescription(s) displayed.`;
+
+            loadMoreButton.hidden =
+                displayedCount >= prescriptions.length;
+
+            prescriptions.slice(0, historyVisibleCount).forEach(prescription => {
 
                 const row = document.createElement('tr');
 
@@ -301,6 +347,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
+    // Load the next 20 prescriptions.
+    document.getElementById('history-load-more')
+        .addEventListener('click', () => {
+
+            historyVisibleCount += 40;
+
+            loadPrescriptionHistory(
+                currentHistoryPatientMRNumber,
+                true
+            );
+
+        });
+
+    // Reload history when the date filter changes.
+    document.getElementById('history-date-filter')
+        .addEventListener('change', () => {
+            loadPrescriptionHistory(currentHistoryPatientMRNumber);
+        });
+
+    // Reload history when the month filter changes.
+    document.getElementById('history-month-filter')
+        .addEventListener('change', () => {
+            loadPrescriptionHistory(currentHistoryPatientMRNumber);
+        });
+
+    // Clear both date and month filters.
+    document.getElementById('clear-history-filters')
+        .addEventListener('click', () => {
+
+            document.getElementById('history-date-filter').value = '';
+            document.getElementById('history-month-filter').value = '';
+
+            loadPrescriptionHistory(currentHistoryPatientMRNumber);
+
+        });
 
     // Display the details of a selected prescription.
 
@@ -519,6 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================
 
     let allPatients = [];
+    let patientsVisibleCount = 40;
 
     async function loadPatients() {
 
@@ -579,6 +661,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const status =
             document.getElementById('patients-status');
 
+        const loadMoreButton =
+            document.getElementById('patients-load-more');
+
+        loadMoreButton.hidden = true;
+
         const searchText = document
             .getElementById('patient-search')
             .value.trim()
@@ -609,10 +696,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
-        status.textContent =
-            `${filteredPatients.length} of ${allPatients.length} patient(s) displayed.`;
+        const displayedCount = Math.min(
+            patientsVisibleCount,
+            filteredPatients.length
+        );
 
-        filteredPatients.forEach(patient => {
+        status.textContent =
+            `${displayedCount} of ${filteredPatients.length} matching patient(s) displayed.`;
+
+        loadMoreButton.hidden =
+            displayedCount >= filteredPatients.length;
+
+        filteredPatients.slice(0, patientsVisibleCount).forEach(patient => {
 
             const row = document.createElement('tr');
 
@@ -641,14 +736,79 @@ document.addEventListener('DOMContentLoaded', () => {
             viewButton.className = 'secondary-button';
             viewButton.textContent = 'View History';
 
+
             viewButton.addEventListener('click', () => {
 
                 showPatientHistory(patient);
 
             });
 
+            // Delete patient and all associated prescriptions.
+            const deleteButton = document.createElement('button');
+
+            deleteButton.type = 'button';
+            deleteButton.className = 'delete-button';
+            deleteButton.textContent = 'Delete';
+
+            deleteButton.addEventListener('click', async () => {
+
+                const prescriptionCount = Number(
+                    patient.prescription_count
+                ) || 0;
+
+                const confirmed = confirm(
+                    `Are you sure you want to delete ${patient.patient_name} (${patient.mr_number})?\n\n` +
+                    `This will permanently delete the patient and all ${prescriptionCount} associated prescription(s).\n\n` +
+                    'This action cannot be undone.'
+                );
+
+                if (!confirmed) {
+                    return;
+                }
+
+                deleteButton.disabled = true;
+
+                try {
+
+                    const result =
+                        await window.prescriptionDatabase.deletePatient(
+                            patient.id
+                        );
+
+                    if (!result.success) {
+                        throw new Error(result.message);
+                    }
+
+                    alert(
+                        'Patient and all associated prescriptions have been deleted successfully.'
+                    );
+
+                    // Refresh the patient list and dashboard statistics.
+                    await loadPatients();
+                    await loadDashboardStatistics();
+
+                } catch (error) {
+
+                    console.error('Error deleting patient:', error);
+
+                    alert(
+                        `Unable to delete patient: ${error.message}`
+                    );
+
+                    deleteButton.disabled = false;
+
+                }
+
+            });
+
+            actionCell.style.display = 'flex';
+            actionCell.style.gap = '8px';
+
             actionCell.appendChild(viewButton);
+            actionCell.appendChild(deleteButton);
+
             row.appendChild(actionCell);
+
 
             tableBody.appendChild(row);
 
@@ -662,6 +822,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('patient-search')
         .addEventListener('input', renderPatients);
 
+    // Reset pagination when the search changes.
+    document.getElementById('patient-search')
+        .addEventListener('input', () => {
+            patientsVisibleCount = 40;
+        });
+
+    // Display the next 40 patients.
+    document.getElementById('patients-load-more')
+        .addEventListener('click', () => {
+
+            patientsVisibleCount += 40;
+
+            renderPatients();
+
+        });
 
     // Show all prescriptions belonging to a selected patient.
 
@@ -1182,7 +1357,12 @@ document.addEventListener('DOMContentLoaded', () => {
             formatDate(getValue('prescription-date'))
         );
 
-        setPreview('preview-age', getValue('patient-age'));
+        const age = getValue('patient-age');
+
+        setPreview(
+            'preview-age',
+            age ? `${age} years` : ''
+        );
 
         setPreview('preview-gender', getValue('patient-gender'));
 
@@ -1216,29 +1396,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const treatments = collectTreatments();
 
-        treatments.forEach((treatment, index) => {
+        let displayedNumber = 0;
 
-            const row = createElement(
-                'div',
-                'paper-treatment'
-            );
+        treatments.forEach(treatment => {
 
-            const number = createElement(
-                'span',
-                '',
-                `${index + 1}.`
-            );
-
-            const details = createElement('div');
-
-            const lines = [
+            const hasInformation = [
                 treatment.medicine,
                 treatment.dosage,
                 treatment.timing,
                 treatment.duration
-            ].filter(Boolean);
+            ].some(value => value);
 
-            details.textContent = lines.join('\n');
+            if (!hasInformation) return;
+
+            displayedNumber++;
+
+            const row = createElement('div', 'paper-treatment');
+
+            const number = createElement(
+                'span',
+                'treatment-number',
+                `${displayedNumber}.`
+            );
+
+            const details = createElement('div', 'treatment-details');
+
+            // First line: medicine name followed by duration.
+            const firstLine = createElement('div', 'treatment-first-line');
+
+            if (treatment.medicine) {
+                firstLine.appendChild(
+                    createElement(
+                        'span',
+                        'treatment-medicine',
+                        treatment.medicine
+                    )
+                );
+            }
+
+            if (treatment.duration) {
+                firstLine.appendChild(
+                    createElement(
+                        'span',
+                        'treatment-instructions',
+                        treatment.duration
+                    )
+                );
+            }
+
+            if (treatment.duration || treatment.medicine) {
+                details.appendChild(firstLine);
+            }
+
+            // Separate lines for dosage and timing.
+            if (treatment.dosage) {
+                details.appendChild(
+                    createElement(
+                        'div',
+                        'treatment-instructions',
+                        treatment.dosage
+                    )
+                );
+            }
+
+            if (treatment.timing) {
+                details.appendChild(
+                    createElement(
+                        'div',
+                        'treatment-instructions',
+                        treatment.timing
+                    )
+                );
+            }
 
             row.appendChild(number);
             row.appendChild(details);
@@ -1315,46 +1544,7 @@ document.addEventListener('DOMContentLoaded', () => {
         prescriptionSavedForCurrentForm = false;
     });
 
-    // Ask the doctor whether printing was successful
-    // after the print dialogue has closed.
-    window.addEventListener('afterprint', () => {
 
-        if (!printInProgress) return;
-
-        printInProgress = false;
-
-        const printedSuccessfully = confirm(
-            'Was the prescription printed successfully?'
-        );
-
-        if (printedSuccessfully) {
-
-            // Clear the form only after confirmation.
-            form.reset();
-
-            dateInput.value = getLocalDate();
-
-            selectedInvestigations.clear();
-
-            treatmentContainer.replaceChildren();
-
-            treatmentCounter = 0;
-
-            addTreatment();
-
-            renderInvestigations();
-
-            updatePreview();
-
-            prescriptionSavedForCurrentForm = false;
-            editingPrescriptionId = null;
-
-        }
-
-        // If the doctor selects No, retain the form.
-        // The next print attempt will not save another copy.
-
-    });
 
 
     document.getElementById('print-button')
@@ -1367,10 +1557,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const prescriptionDate = getValue('prescription-date');
 
             // Validate required fields.
-            if (!patientName || !mrNumber || !prescriptionDate) {
+            if (!patientName || !prescriptionDate) {
 
                 alert(
-                    'Please enter the patient name, MR number and prescription date.'
+                    'Please enter the patient name and prescription date.'
                 );
 
                 return;
@@ -1425,12 +1615,59 @@ document.addEventListener('DOMContentLoaded', () => {
                         editingPrescriptionId = result.prescriptionId;
                     }
 
+                    // Display the generated or existing MR number.
+                    document.getElementById('mr-number').value = result.mrNumber;
+
+                    updatePreview();
+
                 }
 
-                // Open the print dialogue.
-                printInProgress = true;
+                // Open the A4 print dialogue through Electron.
+                const printResult =
+                    await window.prescriptionDatabase.print();
 
-                window.print();
+                if (!printResult.success) {
+
+                    alert(
+                        `Printing was cancelled or could not be completed.\n\n${printResult.message}`
+                    );
+
+                    return;
+
+                }
+
+                // Ask whether the prescription was printed successfully.
+                const printedSuccessfully = confirm(
+                    'Was the prescription printed successfully?'
+                );
+
+                if (printedSuccessfully) {
+
+                    // Clear the form only after confirmation.
+                    form.reset();
+
+                    dateInput.value = getLocalDate();
+
+                    selectedInvestigations.clear();
+
+                    treatmentContainer.replaceChildren();
+
+                    treatmentCounter = 0;
+
+                    addTreatment();
+
+                    renderInvestigations();
+
+                    updatePreview();
+
+                    prescriptionSavedForCurrentForm = false;
+
+                    editingPrescriptionId = null;
+
+                }
+
+                // If the doctor selects No, retain the form.
+                // The next print attempt will not save another copy.
 
             } catch (error) {
 
