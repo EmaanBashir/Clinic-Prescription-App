@@ -473,11 +473,41 @@ main {
     height: 18mm;
     border-bottom: 1px solid black;
     display: grid;
-    grid-template-columns: 26% 47% 22% 5%;
+    grid-template-columns: 26% 48% 22% 4%;
     grid-template-rows: 1fr 1fr;
     padding: 0 7mm 2mm;
     font-size: 13pt;
     align-items: center;
+}
+
+.patient-details > div:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.patient-details > div:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.patient-details > div:nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+.patient-details > div:nth-child(4) {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.patient-details > div:nth-child(5) {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.patient-details > div:nth-child(6) {
+    grid-column: 3;
+    grid-row: 2;
 }
 
 .patient-details div {
@@ -519,7 +549,7 @@ main {
     flex-wrap: wrap;
     align-content: flex-start;
     gap: 5mm 4mm;
-    padding: 4mm 3mm;
+    padding: 4mm 3mm 4mm 6mm;
     font-size: 13pt;
 }
 
@@ -534,7 +564,7 @@ main {
 }
 
 .paper-investigations {
-    padding: 4mm 3mm;
+    padding: 4mm 3mm 4mm 6mm;
     min-height: 38mm;
     font-size: 13pt;
 }
@@ -555,7 +585,7 @@ main {
 .paper-followup {
     position: static;
     margin-top: auto;
-    margin-left: 3mm;
+    margin-left: 6mm;
     margin-right: 3mm;
     width: calc(100% - 6mm);
     flex-shrink: 0;
@@ -914,10 +944,88 @@ main {
     color: white;
 }
 
-/* Make prescription field headings stand out */
-#prescription-paper .patient-details strong,
-#prescription-paper .paper-observations strong,
-#prescription-paper .vco-box strong {
-    font-weight: 700 !important;
+/* Prescription text: normal weight except medicine names */
+
+#prescription-paper strong {
+    font-weight: normal !important;
 }
 
+#prescription-paper .treatment-medicine {
+    font-weight: bold !important;
+}
+
+/* Medicine search field */
+
+.treatment-card input[list] {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #d9e0e4;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+    color: #263238;
+}
+
+.treatment-card input[list]:focus {
+    outline: none;
+    border-color: #174b60;
+}
+
+/* Medicine autocomplete container */
+.medicine-autocomplete {
+    position: relative;
+    width: 100%;
+}
+
+/* Medicine search input */
+.treatment-card .medicine-autocomplete input {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #d9e0e4;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+    color: #263238;
+    box-sizing: border-box;
+}
+
+.treatment-card .medicine-autocomplete input:focus {
+    outline: none;
+    border-color: #174b60;
+}
+
+/* Suggestions dropdown */
+.medicine-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #d9e0e4;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+}
+
+/* Individual medicine suggestions */
+.medicine-suggestion {
+    padding: 10px 11px;
+    font-size: 13px;
+    color: #263238;
+    background: white;
+    cursor: pointer;
+}
+
+.medicine-suggestion:hover {
+    background: #edf3f5;
+}
+
+/* No matching results */
+.medicine-no-results {
+    padding: 10px 11px;
+    font-size: 13px;
+    color: #777;
+    background: white;
+}
