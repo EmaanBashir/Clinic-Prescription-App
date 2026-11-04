@@ -15,13 +15,19 @@
     "better-sqlite3": "*",
     "xlsx": "*"
   },
-  "build": {
-    "appId": "com.prescription.doctorapp",
-    "productName": "Prescription Manager",
-    "win": {
-      "target": "nsis"
+"build": {
+  "appId": "com.prescription.doctorapp",
+  "productName": "Prescription Manager",
+  "extraResources": [
+    {
+      "from": "data/Prescription_Options.xlsx",
+      "to": "data/Prescription_Options.xlsx"
     }
-  },
+  ],
+  "win": {
+    "target": "nsis"
+  }
+},
   "allowScripts": {
     "better-sqlite3@13.0.3": true,
     "electron-winstaller@5.4.0": true
