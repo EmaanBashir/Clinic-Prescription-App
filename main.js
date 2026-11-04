@@ -204,6 +204,22 @@ function initialiseDatabase() {
             );
         `);
 
+        // Add observations_notes column if it does not already exist.
+        // This also safely updates databases created by older app versions.
+        const prescriptionColumns = db
+            .prepare('PRAGMA table_info(prescriptions)')
+            .all();
+
+        const hasObservationsNotes = prescriptionColumns.some(
+            column => column.name === 'observations_notes'
+        );
+
+        if (!hasObservationsNotes) {
+            db.exec(`
+        ALTER TABLE prescriptions
+        ADD COLUMN observations_notes TEXT
+    `);
+        }
 
         // Indexes help searches by patient and prescription date.
         db.exec(`
@@ -344,6 +360,10 @@ ipcMain.handle('prescription:save', (event, prescription) => {
             prescription.treatments || []
         );
 
+        const observationsNotes = String(
+            prescription.observationsNotes || ''
+        ).trim();
+
         const saveTransaction = db.transaction(() => {
 
             // Generate a unique NA number if the doctor has not entered an MR number.
@@ -442,6 +462,7 @@ ipcMain.handle('prescription:save', (event, prescription) => {
                         bp = ?,
                         pulse = ?,
                         temperature = ?,
+                        observations_notes = ?,
                         investigations_json = ?,
                         treatments_json = ?,
                         followup = ?,
@@ -453,6 +474,7 @@ ipcMain.handle('prescription:save', (event, prescription) => {
                     prescription.bp || '',
                     prescription.pulse || '',
                     prescription.temperature || '',
+                    observationsNotes,
                     investigationsJson,
                     treatmentsJson,
                     prescription.followup || '',
@@ -477,17 +499,19 @@ ipcMain.handle('prescription:save', (event, prescription) => {
                         bp,
                         pulse,
                         temperature,
+                        observations_notes,
                         investigations_json,
                         treatments_json,
                         followup
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `).run(
                     patientId,
                     prescriptionDate,
                     prescription.bp || '',
                     prescription.pulse || '',
                     prescription.temperature || '',
+                    observationsNotes,
                     investigationsJson,
                     treatmentsJson,
                     prescription.followup || ''
@@ -546,6 +570,7 @@ ipcMain.handle('prescription:history', () => {
                 prescriptions.bp,
                 prescriptions.pulse,
                 prescriptions.temperature,
+                prescriptions.observations_notes,
                 prescriptions.investigations_json,
                 prescriptions.treatments_json,
                 prescriptions.followup,

@@ -911,6 +911,11 @@ main {
 #history-detail-content p {
     margin: 12px 0;
     white-space: pre-line;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 #history-detail[hidden] {
@@ -1028,4 +1033,42 @@ main {
     font-size: 13px;
     color: #777;
     background: white;
+}
+
+.observations-notes-field {
+    margin-top: 15px;
+}
+
+.observations-notes-preview {
+    flex-basis: 100%;
+    width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 12pt;
+    line-height: 1.35;
+}
+
+/* Additional observations notes - form */
+.observations-notes-field {
+    margin-top: 12px;
+}
+
+.observations-notes-field textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+/* Additional observations notes - A4 preview */
+.paper-observations .observations-notes-preview {
+    flex-basis: 100%;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2mm;
+}
+
+.paper-observations .observations-notes-preview span {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }

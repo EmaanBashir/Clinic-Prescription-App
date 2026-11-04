@@ -427,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addDetail('Blood Pressure', prescription.bp);
         addDetail('Pulse', prescription.pulse);
         addDetail('Temperature', prescription.temperature);
+        addDetail('Additional Notes', prescription.observations_notes);
 
         const investigations = parseJson(
             prescription.investigations_json
@@ -498,6 +499,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('temperature').value =
             prescription.temperature || '';
+
+        document.getElementById('observations-notes').value =
+            prescription.observations_notes || '';
 
         document.getElementById('followup').value =
             prescription.followup || '';
@@ -1472,6 +1476,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setPreview('preview-temp', getValue('temperature'));
 
+        setPreview(
+            'preview-observations-notes',
+            getValue('observations-notes')
+        );
 
         // Investigations
 
@@ -1688,6 +1696,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         bp: getValue('bp'),
                         pulse: getValue('pulse'),
                         temperature: getValue('temperature'),
+                        observationsNotes: getValue('observations-notes'),
                         investigations: Array.from(selectedInvestigations),
                         treatments: collectTreatments(),
                         followup: getValue('followup')
